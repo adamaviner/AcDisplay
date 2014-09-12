@@ -138,7 +138,7 @@ public class CircleView extends View {
 
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
-        mPaint.setColor(Color.WHITE);
+        mPaint.setColor(Color.rgb(72, 199, 175));
 
         mRadiusTarget = res.getDimension(R.dimen.circle_radius_target);
         mRadiusDecreaseThreshold = res.getDimension(R.dimen.circle_radius_decrease_threshold);
