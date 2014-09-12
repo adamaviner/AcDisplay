@@ -143,7 +143,7 @@ public class CircleView extends View {
         mRadiusTarget = res.getDimension(R.dimen.circle_radius_target);
         mRadiusDecreaseThreshold = res.getDimension(R.dimen.circle_radius_decrease_threshold);
 
-        mDrawable = res.getDrawable(R.drawable.ic_unlock);
+        mDrawable = res.getDrawable(R.drawable.ic_unlock); //todo use locked icon until we reach the unlock radius?
         mDrawable.setBounds(0, 0,
                 mDrawable.getIntrinsicWidth(),
                 mDrawable.getIntrinsicHeight());
@@ -167,8 +167,16 @@ public class CircleView extends View {
         canvas.drawColor(Color.argb(alpha, 0, 0, 0));
 
         // Draw unlock circle
-        mPaint.setAlpha((int) (255 * Math.pow(ratio, 1f / 3f)));
+        int circleAlpha = (int) (255 * Math.pow(ratio, 1f / 3f));
+        mPaint.setAlpha(circleAlpha);
         canvas.drawCircle(mPoint[0], mPoint[1], mRadiusDrawn, mPaint);
+
+        // Draw target radius indicator
+        if (!mRadiusTargetAimed) {
+            int targetCircleAlpha = (int) (circleAlpha * 0.5);
+            mPaint.setAlpha(targetCircleAlpha);
+            canvas.drawCircle(mPoint[0], mPoint[1], 122, mPaint);
+        }
 
         if (ratio >= 0.5f) {
             // Draw unlock icon at the center of circle
@@ -215,13 +223,7 @@ public class CircleView extends View {
                 mPoint[1] = y;
                 mCanceled = false;
 
-                if (mHandler.hasMessages(ACTION_UNLOCK)) {
-                    // Cancel unlocking process.
-                    mHandler.sendEmptyMessage(ACTION_UNLOCK_CANCEL);
-                }
-
                 mHandler.removeCallbacksAndMessages(null);
-                mHandler.sendEmptyMessageDelayed(MSG_CANCEL, 1000);
                 mHandler.sendEmptyMessage(ACTION_START);
             case MotionEvent.ACTION_MOVE:
                 setRadius((float) Math.hypot(x - mPoint[0], y - mPoint[1]));
@@ -232,9 +234,6 @@ public class CircleView extends View {
                     performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY); // vibrate
                 }
 
-                if (mRadiusMaxPeak - mRadius > mRadiusDecreaseThreshold) {
-                    cancelCircle();
-                }
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
